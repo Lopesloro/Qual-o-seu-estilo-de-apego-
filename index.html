@@ -4,199 +4,419 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Qual é o seu estilo de apego?</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
 :root{
-  --bg1:#0d0618;--bg2:#1a0a2e;--accent:#9b5de5;--accent2:#f72585;
-  --glass:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.10);
-  --text:#f0eaff;--muted:rgba(240,234,255,0.55)
+  --bg:#0F172A;
+  --surface:rgba(255,255,255,0.04);
+  --surface2:rgba(255,255,255,0.07);
+  --border:rgba(255,255,255,0.08);
+  --border-hover:rgba(255,255,255,0.18);
+  --purple:#7C3AED;
+  --blue:#2563EB;
+  --cyan:#06B6D4;
+  --text:#F8FAFC;
+  --muted:#94A3B8;
+  --dim:#475569;
 }
+
+html{scroll-behavior:smooth}
 body{
-  font-family:'Inter',sans-serif;background:linear-gradient(135deg,var(--bg1) 0%,var(--bg2) 50%,#0f0526 100%);
-  min-height:100vh;color:var(--text);display:flex;flex-direction:column;align-items:center;
-  justify-content:center;padding:24px 16px;overflow-x:hidden;position:relative
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:40px 20px;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
 }
 
-/* floating orbs */
-.orb{position:fixed;border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:drift 8s ease-in-out infinite}
-.orb1{width:300px;height:300px;background:rgba(155,93,229,0.18);top:-80px;left:-80px;animation-delay:0s}
-.orb2{width:250px;height:250px;background:rgba(247,37,133,0.14);bottom:-60px;right:-60px;animation-delay:-4s}
-.orb3{width:180px;height:180px;background:rgba(155,93,229,0.10);top:50%;left:70%;animation-delay:-2s}
-@keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,30px)}}
-
-/* floating particles */
-.particle{position:fixed;width:4px;height:4px;border-radius:50%;background:var(--accent);opacity:0;pointer-events:none;animation:float-up linear infinite}
-@keyframes float-up{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:.4}90%{opacity:.2}100%{transform:translateY(-20px) scale(1);opacity:0}}
-
-main{position:relative;z-index:1;width:100%;max-width:480px;display:flex;flex-direction:column;align-items:center;gap:24px}
-
-/* hero */
-.badge{
-  display:inline-flex;align-items:center;gap:8px;
-  background:var(--glass);border:1px solid var(--border);
-  border-radius:100px;padding:6px 14px;font-size:12px;color:var(--accent);
-  font-weight:500;letter-spacing:.5px;text-transform:uppercase;
-  backdrop-filter:blur(12px);animation:fadeDown .6s ease
+/* BG */
+.bg-glow{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 50% at 15% 10%,rgba(124,58,237,.14) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 90%,rgba(6,182,212,.10) 0%,transparent 60%);
 }
-.badge::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--accent2);animation:blink 1.6s ease infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black,transparent);
+}
 
-h1{
-  font-size:clamp(26px,6vw,38px);font-weight:700;text-align:center;
-  line-height:1.2;letter-spacing:-.5px;
-  background:linear-gradient(135deg,#f0eaff 0%,var(--accent) 60%,var(--accent2) 100%);
+.wrap{position:relative;z-index:1;width:100%;max-width:460px}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;gap:0}
+.screen.active{display:flex;animation:up .45s cubic-bezier(.16,1,.3,1)}
+@keyframes up{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:translateY(0)}}
+
+/* PROGRESS */
+.prog-row{display:flex;align-items:center;gap:14px;margin-bottom:44px}
+.prog-track{
+  flex:1;height:3px;
+  background:rgba(255,255,255,.06);
+  border-radius:3px;overflow:hidden;
+}
+.prog-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--purple),var(--cyan));
+  border-radius:3px;
+  transition:width .6s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 10px rgba(124,58,237,.5);
+}
+.prog-txt{font-size:12px;color:var(--dim);font-weight:500;flex-shrink:0;letter-spacing:.3px}
+
+/* QUESTION */
+.q-tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:11px;font-weight:600;color:#A78BFA;
+  letter-spacing:1.2px;text-transform:uppercase;
+  margin-bottom:16px;
+}
+.q-tag-dot{width:5px;height:5px;border-radius:50%;background:var(--purple);animation:blink 1.8s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.q-text{
+  font-size:clamp(20px,5vw,26px);
+  font-weight:700;
+  color:var(--text);
+  line-height:1.3;
+  letter-spacing:-.4px;
+  margin-bottom:32px;
+}
+
+/* OPTIONS */
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{
+  background:var(--surface);
+  border:1.5px solid var(--border);
+  border-radius:16px;
+  padding:18px 20px;
+  font-size:15px;
+  color:var(--muted);
+  cursor:pointer;
+  text-align:left;
+  line-height:1.5;
+  transition:all .2s cubic-bezier(.4,0,.2,1);
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+  overflow:hidden;
+  backdrop-filter:blur(8px);
+}
+.opt::before{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(6,182,212,.04));
+  opacity:0;transition:opacity .2s;border-radius:inherit;
+}
+.opt:hover{
+  border-color:var(--border-hover);
+  color:var(--text);
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+}
+.opt:hover::before{opacity:1}
+.opt:active{transform:translateY(0);transition-duration:.08s}
+
+.opt.sel{
+  background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(6,182,212,.1));
+  border-color:rgba(124,58,237,.5);
+  color:var(--text);
+  transform:translateY(-2px);
+  box-shadow:0 8px 32px rgba(124,58,237,.2);
+}
+.opt.sel::after{
+  content:'✓';
+  position:absolute;right:18px;top:50%;transform:translateY(-50%);
+  width:24px;height:24px;
+  background:linear-gradient(135deg,var(--purple),var(--cyan));
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;
+  animation:pop .25s cubic-bezier(.16,1,.3,1);
+  display:flex;align-items:center;justify-content:center;
+  text-align:center;line-height:24px;
+}
+@keyframes pop{from{transform:translateY(-50%) scale(0)}to{transform:translateY(-50%) scale(1)}}
+
+/* LOADING */
+#sl{
+  align-items:center;justify-content:center;
+  min-height:60vh;gap:22px;
+}
+.spin{
+  width:46px;height:46px;
+  border:2px solid rgba(255,255,255,.06);
+  border-top-color:var(--purple);
+  border-right-color:var(--cyan);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+  box-shadow:0 0 20px rgba(124,58,237,.3);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dots{display:flex;gap:7px}
+.dots i{
+  display:block;width:7px;height:7px;border-radius:50%;
+  background:rgba(255,255,255,.15);
+  animation:dot .9s ease-in-out infinite;
+}
+.dots i:nth-child(2){animation-delay:.15s}
+.dots i:nth-child(3){animation-delay:.3s}
+@keyframes dot{0%,80%,100%{transform:scale(.6);background:rgba(255,255,255,.15)}40%{transform:scale(1);background:var(--purple)}}
+.ltxt{font-size:14px;color:var(--dim);letter-spacing:.2px}
+
+/* RESULT */
+#sr{gap:14px}
+
+.r-hero{
+  background:linear-gradient(135deg,rgba(124,58,237,.2) 0%,rgba(37,99,235,.15) 50%,rgba(6,182,212,.1) 100%);
+  border:1px solid rgba(124,58,237,.25);
+  border-radius:22px;padding:30px 26px;
+  backdrop-filter:blur(16px);
+  animation:up .45s cubic-bezier(.16,1,.3,1);
+}
+.r-eyebrow{font-size:11px;font-weight:600;color:#A78BFA;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:12px}
+.r-name{
+  font-size:clamp(28px,7vw,36px);
+  font-weight:800;letter-spacing:-.8px;line-height:1.1;
+  margin-bottom:16px;
+  background:linear-gradient(135deg,#F8FAFC,#A78BFA,#67E8F9);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  animation:fadeUp .7s ease .1s both
 }
-.subtitle{
-  font-size:15px;color:var(--muted);text-align:center;line-height:1.6;
-  max-width:380px;animation:fadeUp .7s ease .2s both
-}
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.r-desc{font-size:15px;color:var(--muted);line-height:1.7;font-weight:400}
 
-/* glass card */
-.card{
-  width:100%;background:var(--glass);border:1px solid var(--border);
-  border-radius:20px;padding:24px;backdrop-filter:blur(16px);
-  animation:fadeUp .7s ease .3s both
+.r-pts{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:22px;padding:24px 22px;
+  display:flex;flex-direction:column;gap:16px;
+  backdrop-filter:blur(12px);
+  animation:up .45s cubic-bezier(.16,1,.3,1) .08s both;
 }
-.checks{display:flex;flex-direction:column;gap:12px}
-.check-item{display:flex;align-items:center;gap:10px;font-size:14px;color:rgba(240,234,255,.8)}
-.check-icon{
-  width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px
+.rp{display:flex;align-items:flex-start;gap:12px;font-size:14px;color:var(--muted);line-height:1.6}
+.rp-icon{
+  width:24px;height:24px;border-radius:8px;flex-shrink:0;margin-top:1px;
+  background:linear-gradient(135deg,rgba(124,58,237,.3),rgba(6,182,212,.2));
+  border:1px solid rgba(124,58,237,.2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;color:#A78BFA;
 }
-.divider{height:1px;background:var(--border);margin:20px 0}
-.stat-row{display:flex;justify-content:space-around;gap:12px}
-.stat{text-align:center}
-.stat-num{font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.stat-label{font-size:11px;color:var(--muted);margin-top:2px}
 
-/* CTA */
+.r-cta{
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:22px;padding:26px;
+  backdrop-filter:blur(16px);
+  animation:up .45s cubic-bezier(.16,1,.3,1) .16s both;
+}
+.cta-tag{font-size:11px;font-weight:600;color:var(--dim);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.cta-h{font-size:20px;font-weight:700;letter-spacing:-.3px;margin-bottom:5px}
+.cta-s{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.55}
+
+.cta-checks{display:flex;flex-direction:column;gap:9px;margin-bottom:22px}
+.cta-check{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted)}
+.cta-check-dot{
+  width:18px;height:18px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--purple),var(--cyan));
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;color:#fff;font-weight:700;
+}
+
 .cta-btn{
-  width:100%;padding:17px;border:none;border-radius:14px;
-  background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);
-  color:#fff;font-size:16px;font-weight:600;cursor:pointer;
-  letter-spacing:.2px;position:relative;overflow:hidden;
-  animation:fadeUp .7s ease .4s both, pulse 2.4s ease-in-out 1.2s infinite
+  display:block;width:100%;padding:17px;
+  background:linear-gradient(135deg,var(--purple) 0%,var(--blue) 50%,var(--cyan) 100%);
+  border:none;border-radius:14px;
+  font-size:15px;font-weight:700;color:#fff;
+  cursor:pointer;text-decoration:none;text-align:center;
+  font-family:inherit;letter-spacing:-.1px;
+  position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;
+  animation:pulse-btn 3s ease-in-out infinite;
 }
-.cta-btn::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+.cta-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent)}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(124,58,237,.4)}
+.cta-btn:active{transform:translateY(0)}
+@keyframes pulse-btn{
+  0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,.4)}
+  50%{box-shadow:0 0 0 10px rgba(124,58,237,0)}
 }
-@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(155,93,229,.4)}70%{box-shadow:0 0 0 14px rgba(155,93,229,0)}}
-
-/* progress bar */
-.social-bar{
-  width:100%;background:var(--glass);border:1px solid var(--border);
-  border-radius:12px;padding:14px 16px;backdrop-filter:blur(12px);
-  animation:fadeUp .7s ease .5s both
-}
-.social-bar-label{font-size:12px;color:var(--muted);margin-bottom:8px;display:flex;justify-content:space-between}
-.bar-track{height:6px;background:rgba(255,255,255,.08);border-radius:100px;overflow:hidden}
-.bar-fill{height:100%;width:0;border-radius:100px;background:linear-gradient(90deg,var(--accent),var(--accent2));animation:fill-bar 1.6s ease .8s forwards}
-@keyframes fill-bar{to{width:87%}}
-
-/* counter */
-.counter{
-  font-size:13px;color:var(--muted);text-align:center;
-  animation:fadeUp .7s ease .6s both
-}
-.counter span{color:var(--accent);font-weight:600}
-
-/* unlock section */
-.unlock{
-  width:100%;background:var(--glass);border:1px solid var(--border);
-  border-radius:20px;padding:28px 24px;backdrop-filter:blur(16px);
-  text-align:center;animation:fadeUp .7s ease .7s both
-}
-.unlock h2{font-size:20px;font-weight:700;margin-bottom:8px}
-.unlock p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
-.unlock-btn{
-  display:block;width:100%;padding:15px;border-radius:12px;
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
-  color:#fff;font-size:15px;font-weight:600;text-decoration:none;
-  border:none;cursor:pointer
-}
-
-footer{font-size:11px;color:rgba(255,255,255,.2);text-align:center;animation:fadeUp .7s ease .8s both}
+.cta-price{font-size:12px;color:var(--dim);text-align:center;margin-top:12px}
 </style>
 </head>
 <body>
+<div class="bg-glow"></div>
+<div class="bg-grid"></div>
 
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-<div class="orb orb3"></div>
+<div class="wrap">
 
-<main>
-  <div class="badge">✦ Psicologia comportamental</div>
-
-  <h1>Descubra por que você sempre acaba vivendo os mesmos relacionamentos.</h1>
-
-  <p class="subtitle">Seu padrão emocional pode estar sabotando sua vida amorosa sem você perceber.</p>
-
-  <div class="card">
-    <div class="checks">
-      <div class="check-item"><div class="check-icon">✓</div>Baseado em psicologia comportamental</div>
-      <div class="check-item"><div class="check-icon">✓</div>Duração de apenas 2 minutos</div>
-      <div class="check-item"><div class="check-icon">✓</div>Resultado 100% personalizado</div>
-      <div class="check-item"><div class="check-icon">✓</div>Mais de 50 mil participantes</div>
-    </div>
-    <div class="divider"></div>
-    <div class="stat-row">
-      <div class="stat"><div class="stat-num">4</div><div class="stat-label">estilos possíveis</div></div>
-      <div class="stat"><div class="stat-num">7</div><div class="stat-label">perguntas</div></div>
-      <div class="stat"><div class="stat-num">2min</div><div class="stat-label">duração</div></div>
-    </div>
+<!-- Q1 -->
+<div class="screen active" id="s1">
+  <div class="prog-row"><div class="prog-track"><div class="prog-fill" style="width:16%"></div></div><span class="prog-txt">1 / 6</span></div>
+  <div class="q-tag"><div class="q-tag-dot"></div>Pergunta 01</div>
+  <div class="q-text">Quando alguém que você gosta demora para responder, o que acontece dentro de você?</div>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,1,'A')">Fico tranquilo — se me quer, vai responder.</div>
+    <div class="opt" onclick="pick(this,1,'B')">Começo a criar histórias sobre o porquê do silêncio.</div>
+    <div class="opt" onclick="pick(this,1,'C')">Releio tudo procurando o que fiz de errado.</div>
+    <div class="opt" onclick="pick(this,1,'D')">Me afasto antes de parecer que estou esperando.</div>
   </div>
+</div>
 
-  <button class="cta-btn" onclick="document.querySelector('.unlock').scrollIntoView({behavior:'smooth'})">
-    Descobrir meu estilo de apego →
-  </button>
-
-  <div class="social-bar">
-    <div class="social-bar-label">
-      <span>87% ficam surpresos com o resultado</span>
-      <span id="pct">0%</span>
-    </div>
-    <div class="bar-track"><div class="bar-fill"></div></div>
+<!-- Q2 -->
+<div class="screen" id="s2">
+  <div class="prog-row"><div class="prog-track"><div class="prog-fill" style="width:33%"></div></div><span class="prog-txt">2 / 6</span></div>
+  <div class="q-tag"><div class="q-tag-dot"></div>Pergunta 02</div>
+  <div class="q-text">Quando um relacionamento começa a ficar sério, você:</div>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,2,'A')">Abre mais — sente que finalmente encontrou alguém.</div>
+    <div class="opt" onclick="pick(this,2,'B')">Fica mais ansioso e com medo de estragar tudo.</div>
+    <div class="opt" onclick="pick(this,2,'C')">Cria distância sem conseguir explicar o porquê.</div>
+    <div class="opt" onclick="pick(this,2,'D')">Testa a pessoa para ver se ela fica mesmo.</div>
   </div>
+</div>
 
-  <p class="counter"><span id="live-count">14</span> pessoas descobriram seu perfil nos últimos 5 minutos</p>
-
-  <div class="unlock">
-    <h2>🔓 Desbloqueie sua análise completa</h2>
-    <p>Descubra qual trauma emocional guia suas escolhas, como você sabota relacionamentos e o que mudar agora.</p>
-    <a href="[INSERIR LINK DE PAGAMENTO AQUI]" class="unlock-btn">Quero minha análise completa →</a>
+<!-- Q3 -->
+<div class="screen" id="s3">
+  <div class="prog-row"><div class="prog-track"><div class="prog-fill" style="width:50%"></div></div><span class="prog-txt">3 / 6</span></div>
+  <div class="q-tag"><div class="q-tag-dot"></div>Pergunta 03</div>
+  <div class="q-text">Sua maior dificuldade nos relacionamentos é:</div>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,3,'A')">Confiar que a pessoa vai continuar ficando.</div>
+    <div class="opt" onclick="pick(this,3,'B')">Não sufocar quem você ama.</div>
+    <div class="opt" onclick="pick(this,3,'C')">Permitir que alguém realmente te conheça.</div>
+    <div class="opt" onclick="pick(this,3,'D')">Aceitar que você também precisa de alguém.</div>
   </div>
+</div>
 
-  <footer>⚠️ Algumas respostas costumam ser desconfortavelmente precisas.</footer>
-</main>
+<!-- Q4 -->
+<div class="screen" id="s4">
+  <div class="prog-row"><div class="prog-track"><div class="prog-fill" style="width:66%"></div></div><span class="prog-txt">4 / 6</span></div>
+  <div class="q-tag"><div class="q-tag-dot"></div>Pergunta 04</div>
+  <div class="q-text">Quando alguém te magoa, você:</div>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,4,'A')">Fala na hora — não consegue guardar.</div>
+    <div class="opt" onclick="pick(this,4,'B')">Engole, mas fica esperando que aconteça de novo.</div>
+    <div class="opt" onclick="pick(this,4,'C')">Fecha. Processa sozinho e talvez nunca mencione.</div>
+    <div class="opt" onclick="pick(this,4,'D')">Age normal por fora, mas algo muda internamente.</div>
+  </div>
+</div>
+
+<!-- Q5 -->
+<div class="screen" id="s5">
+  <div class="prog-row"><div class="prog-track"><div class="prog-fill" style="width:83%"></div></div><span class="prog-txt">5 / 6</span></div>
+  <div class="q-tag"><div class="q-tag-dot"></div>Pergunta 05</div>
+  <div class="q-text">O que você mais teme em um relacionamento?</div>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,5,'A')">Ser abandonado quando mais precisar.</div>
+    <div class="opt" onclick="pick(this,5,'B')">Perder minha independência e identidade.</div>
+    <div class="opt" onclick="pick(this,5,'C')">Ser amado de mentira — a pessoa ir embora quando me conhecer.</div>
+    <div class="opt" onclick="pick(this,5,'D')">Não conseguir amar de volta na mesma intensidade.</div>
+  </div>
+</div>
+
+<!-- Q6 -->
+<div class="screen" id="s6">
+  <div class="prog-row"><div class="prog-track"><div class="prog-fill" style="width:100%"></div></div><span class="prog-txt">6 / 6</span></div>
+  <div class="q-tag"><div class="q-tag-dot"></div>Pergunta 06</div>
+  <div class="q-text">Quando um relacionamento termina, você:</div>
+  <div class="opts">
+    <div class="opt" onclick="pick(this,6,'A')">Sofre intensamente, mas logo procura recomeçar.</div>
+    <div class="opt" onclick="pick(this,6,'B')">Fica repassando o que poderia ter feito diferente.</div>
+    <div class="opt" onclick="pick(this,6,'C')">Sente alívio e culpa ao mesmo tempo.</div>
+    <div class="opt" onclick="pick(this,6,'D')">Age como se não tivesse afetado, mas carrega por meses.</div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="screen" id="sl">
+  <div class="spin"></div>
+  <div class="dots"><i></i><i></i><i></i></div>
+  <div class="ltxt">Analisando suas respostas...</div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="sr"></div>
+
+</div>
 
 <script>
-// particles
-(function(){
-  for(let i=0;i<12;i++){
-    const p=document.createElement('div');
-    p.className='particle';
-    p.style.cssText=`left:${Math.random()*100}%;animation-duration:${6+Math.random()*8}s;animation-delay:${Math.random()*8}s;width:${2+Math.random()*4}px;height:${2+Math.random()*4}px;opacity:.3`;
-    document.body.appendChild(p);
+const ans={};
+const P={
+  A:{
+    name:'Apego Ansioso',
+    desc:'Você sente o relacionamento de forma profunda e intensa. Sua maior dor é a incerteza — o medo de ser abandonado faz você buscar constantemente validação de quem ama, mesmo quando não precisa.',
+    pts:['Você sente tudo com uma intensidade que poucos entendem.','O silêncio do outro ativa um estado de alerta imediato em você.','Sua lealdade é rara — mas cobra um preço alto de você mesmo.','O padrão que mais te machuca: se apegar antes de saber se a pessoa merece.']
+  },
+  B:{
+    name:'Apego Seguro',
+    desc:'Você consegue se conectar sem perder a si mesmo. Sua base emocional é estável — você ama sem precisar controlar o que acontece, e sente confiança natural nas relações que constrói.',
+    pts:['Você expressa o que sente sem drama ou rodeios.','Conflitos não te assustam — você os enfrenta com clareza.','Você atrai pessoas ansiosas porque transmite estabilidade.','Seu desafio: entender quem ao seu redor não tem essa mesma base.']
+  },
+  C:{
+    name:'Apego Evitativo',
+    desc:'Você valoriza profundamente sua independência. Quando alguém chega perto, um mecanismo interno faz você recuar — mesmo sem querer, mesmo gostando da pessoa.',
+    pts:['Você processa emoções sozinho e raramente pede ajuda.','Intimidade real te deixa desconfortável, mesmo quando a deseja.','Você tende a sair dos relacionamentos antes de ser abandonado.','Seu padrão invisível: afastar quem gosta de você no momento que mais importa.']
+  },
+  D:{
+    name:'Apego Desorganizado',
+    desc:'Você quer conexão, mas ela também te assusta. Essa ambivalência cria um padrão intenso e confuso — você se aproxima e foge ao mesmo tempo, sem entender completamente o porquê.',
+    pts:['Você oscila entre querer muito e se afastar de repente.','Relacionamentos que parecem bons ainda te deixam desconfiante.','Sua intuição emocional é aguçada — você sente o que os outros não percebem.','O que mais te trava: a crença de que intimidade sempre vem acompanhada de dor.']
   }
-})();
+};
 
-// percent counter
-let n=0;const pct=document.getElementById('pct');
-setTimeout(()=>{const t=setInterval(()=>{n++;pct.textContent=n+'%';if(n>=87)clearInterval(t)},18)},800);
+function pick(el,q,opt){
+  el.parentElement.querySelectorAll('.opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  ans[q]=opt;
+  setTimeout(()=>go(q),400);
+}
 
-// live counter
-const el=document.getElementById('live-count');
-setInterval(()=>{
-  const v=parseInt(el.textContent);
-  el.textContent=Math.max(8,v+(Math.random()>.5?1:-1));
-},4200);
+function go(q){
+  document.getElementById('s'+q).classList.remove('active');
+  if(q<6){
+    document.getElementById('s'+(q+1)).classList.add('active');
+  } else {
+    document.getElementById('sl').classList.add('active');
+    setTimeout(result,2200);
+  }
+}
+
+function result(){
+  const c={A:0,B:0,C:0,D:0};
+  Object.values(ans).forEach(v=>c[v]++);
+  const top=Object.entries(c).sort((a,b)=>b[1]-a[1])[0][0];
+  const p=P[top];
+  const icons=['◆','◈','◉','◇'];
+  document.getElementById('sr').innerHTML=`
+    <div class="r-hero">
+      <div class="r-eyebrow">Seu resultado</div>
+      <div class="r-name">${p.name}</div>
+      <div class="r-desc">${p.desc}</div>
+    </div>
+    <div class="r-pts">
+      ${p.pts.map((pt,i)=>`<div class="rp"><div class="rp-icon">${icons[i]}</div><span>${pt}</span></div>`).join('')}
+    </div>
+    <div class="r-cta">
+      <div class="cta-tag">Análise completa</div>
+      <div class="cta-h">Sua análise completa está pronta</div>
+      <div class="cta-s">Descubra como esse padrão está afetando sua vida e o que fazer agora.</div>
+      <div class="cta-checks">
+        <div class="cta-check"><div class="cta-check-dot">✓</div>Relatório psicológico completo</div>
+        <div class="cta-check"><div class="cta-check-dot">✓</div>Plano personalizado de mudança</div>
+        <div class="cta-check"><div class="cta-check-dot">✓</div>Próximos passos práticos</div>
+        <div class="cta-check"><div class="cta-check-dot">✓</div>Acesso imediato</div>
+      </div>
+      <a href="[INSERIR LINK DE PAGAMENTO AQUI]" class="cta-btn">Quero minha análise completa →</a>
+      <div class="cta-price">Acesso imediato · R$ 19,90</div>
+    </div>
+  `;
+  document.getElementById('sl').classList.remove('active');
+  document.getElementById('sr').classList.add('active');
+}
 </script>
 </body>
 </html>
